@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { AuthenticationControllerApi } from '../services';
+import { AuthenticationControllerApi, Configuration } from '../services';
 import type { AuthRequest, Usuario } from '../services';
+import { useNavigate } from 'react-router-dom';
+import useToken from '../contexts/TokenContext';
 
 const styles: { [key: string]: CSSProperties } = {
   container: {
@@ -136,7 +138,11 @@ const Home = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const api = new AuthenticationControllerApi();
+  const api = new AuthenticationControllerApi(new Configuration({
+    basePath: '' // Usar ruta relativa para el proxy
+  }));
+  const navigate = useNavigate();
+  const { saveToken } = useToken();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +159,8 @@ const Home = () => {
         setSuccess('¡bienvenido! ya puedes ver los gatitos');
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
+          saveToken(response.data.token);
+          navigate('/dashboard');
         }
       } else {
         const usuario: Usuario = {
@@ -165,6 +173,8 @@ const Home = () => {
         setSuccess('¡bienvenido! ya puedes ver los gatitos');
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
+          saveToken(response.data.token);
+          navigate('/dashboard');
         }
       }
     } catch (err) {
